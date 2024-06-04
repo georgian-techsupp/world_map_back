@@ -20,7 +20,7 @@ def fetch_business_locations(request):
     try:
         code = ISO_CODES.objects.get(iso_code=iso_code)
         country = Country.objects.get(iso_code=code)
-        locations = Coordinates.objects.filter(name=country)
+        locations = Coordinates.objects.filter(name=country, activate=True)
         image_url = request.build_absolute_uri(country.image.url)
     except Country.DoesNotExist:
         return Response({'error': 'Country not found'}, status=404)
