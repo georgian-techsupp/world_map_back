@@ -46,7 +46,7 @@ class CountryViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        data = {country.iso_code: country.image.url for country in queryset}
+        data = {country.iso_code.iso_code: country.image.url for country in queryset}
         return Response(data)
 
 
