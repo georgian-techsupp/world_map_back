@@ -1,4 +1,4 @@
-from .views import  fetch_business_locations
+from .views import  fetch_business_locations, get_google_points
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import CountryViewSet
@@ -10,4 +10,5 @@ router.register(r'countries', CountryViewSet)
 urlpatterns = [
     path('fetch-locations/', fetch_business_locations, name='fetch-locations'),
     path('', include(router.urls)),
+    path('test/',get_google_points, name = "test")
 ]

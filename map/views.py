@@ -5,8 +5,11 @@ from rest_framework.decorators import api_view
 from .models import Country
 from rest_framework import viewsets
 from rest_framework.response import Response
-from .models import Country
+from .models import Country, Coordinates, ISO_CODES
 from .serializers import CountrySerializer
+from .google_utility import google_locations
+import json
+from decimal import Decimal, InvalidOperation
 
 
 @api_view(['GET'])
@@ -14,45 +17,27 @@ def fetch_business_locations(request):
     iso_code = request.query_params.get('iso_code')
     if not iso_code:
         return Response({'error': 'ISO code is required'}, status=400)
-
     try:
-        country = Country.objects.get(iso_code=iso_code)
+        code = ISO_CODES.objects.get(iso_code=iso_code)
+        country = Country.objects.get(iso_code=code)
+        locations = Coordinates.objects.filter(name=country)
+        image_url = request.build_absolute_uri(country.image.url)
     except Country.DoesNotExist:
         return Response({'error': 'Country not found'}, status=404)
 
-    google_api_key = settings.GOOGLE_API_KEY
-    google_places_url = 'https://maps.googleapis.com/maps/api/place/textsearch/json'
-
-    params = {
-        'query': country.business_name,
-        'region': iso_code,
-        'key': google_api_key,
-        'type': 'restaurant'
-    }
-
-    response = requests.get(google_places_url, params=params)
-    data = response.json()
-
-    if data.get('status') != 'OK':
-        return Response({'error': 'Error fetching data from Google Places API'}, status=500)
-
-    locations = [
+    locations_data = [
         {
-            'name': result['name'],
-            'latitude': result['geometry']['location']['lat'],
-            'longitude': result['geometry']['location']['lng'],
+            'location_name': loc.location_name,
+            'latitude': loc.latitude,
+            'longitude': loc.longitude,
+            'activate': loc.activate
         }
-        for result in data.get('results', [])
+        for loc in locations
     ]
-
     return Response({
-        'image_url': country.image.url,
-        'locations': locations
+        'image_url': image_url,
+        'locations': locations_data
     })
-
-
-
-
 
 
 class CountryViewSet(viewsets.ModelViewSet):
@@ -63,3 +48,45 @@ class CountryViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         data = {country.iso_code: country.image.url for country in queryset}
         return Response(data)
+
+
+@api_view(['GET'])
+def get_google_points(request):
+    """gets locations depend on bussines names, 
+    splits it and adding data in db for each bussiness name"""
+    try:
+        iso_code = request.query_params.get('iso_code')
+        if not iso_code:
+            return Response({'error': 'not provided query parameter iso_code'}, status=400)
+        country = ISO_CODES.objects.get(iso_code=iso_code)
+        country_name = Country.objects.get(name=country)
+        business_names = []
+        if "," in country_name.business_name:
+            b_names = country_name.business_name.split(",")
+            for item in b_names:
+                business_names.append(item.strip())
+        else:
+            business_names.append(country_name.business_name)
+        for business in business_names:
+            data = google_locations(business, country.iso_code, country_name.business_type)
+            for location in data['locations']:
+                try:
+                    latitude = float(f"{Decimal(location['latitude']):.6f}")
+                    longitude = float(f"{Decimal(location['longitude']):.6f}")
+                    _, created = Coordinates.objects.get_or_create(
+                        name=country_name,
+                        iso_code=country_name,
+                        business_name=country_name,
+                        location_name=location['name'],
+                        latitude=latitude,
+                        longitude=longitude,
+                    )
+                    if not created:
+                        print(f"Coordinate with latitude {latitude} and longitude {longitude} already exists.")
+                except InvalidOperation:
+                    continue
+    except ISO_CODES.DoesNotExist:
+        return Response({'error': 'ISO code does not exist'}, status=400)
+    except Country.DoesNotExist:
+        return Response({'error': 'Country does not exist at this moment'}, status=400)
+    return Response({'success': f'added locations for {iso_code}'})
