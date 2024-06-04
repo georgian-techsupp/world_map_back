@@ -5,6 +5,8 @@ class ISO_CODES(models.Model):
     name = models.CharField(max_length=255)
     class Meta:
         unique_together = ('iso_code', 'name')
+        verbose_name = 'ISO Code'
+        verbose_name_plural = 'ISO Codes'
 
     def __str__(self):
         return f"{self.name} ({self.iso_code})"
