@@ -10,7 +10,8 @@ from .serializers import CountrySerializer
 from .google_utility import google_locations
 import json
 from decimal import Decimal, InvalidOperation
-
+from django.shortcuts import redirect
+from django.http import HttpResponse
 
 @api_view(['GET'])
 def fetch_business_locations(request):
@@ -90,3 +91,43 @@ def get_google_points(request):
     except Country.DoesNotExist:
         return Response({'error': 'Country does not exist at this moment'}, status=400)
     return Response({'success': f'added locations for {iso_code}'})
+
+
+
+
+def get_google_points_for_countries(request, iso_codes):
+    iso_code_list = iso_codes.split(',')
+    for iso_code in iso_code_list:
+        try:
+            country = ISO_CODES.objects.get(iso_code=iso_code)
+            country_name = Country.objects.get(iso_code=country)
+            business_names = []
+            if "," in country_name.business_name:
+                b_names = country_name.business_name.split(",")
+                for item in b_names:
+                    business_names.append(item.strip())
+            else:
+                business_names.append(country_name.business_name)
+            for business in business_names:
+                data = google_locations(business, country.iso_code, country_name.business_type)
+                for location in data['locations']:
+                    try:
+                        latitude = float(f"{Decimal(location['latitude']):.6f}")
+                        longitude = float(f"{Decimal(location['longitude']):.6f}")
+                        _, created = Coordinates.objects.get_or_create(
+                            name=country_name,
+                            iso_code=country_name,
+                            business_name=country_name,
+                            location_name=location['name'],
+                            latitude=latitude,
+                            longitude=longitude,
+                        )
+                        if not created:
+                            print(f"Coordinate with latitude {latitude} and longitude {longitude} already exists.")
+                    except InvalidOperation:
+                        continue
+        except ISO_CODES.DoesNotExist:
+            return HttpResponse(f'ISO code {iso_code} does not exist', status=400)
+        except Country.DoesNotExist:
+            return HttpResponse(f'Country with ISO code {iso_code} does not exist at this moment', status=400)
+    return redirect('/admin/map/country/')
