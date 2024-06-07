@@ -17,6 +17,8 @@ class Country(models.Model):
     image = models.ImageField(upload_to='country_images/' )
     business_name = models.CharField(max_length=255)
     business_type = models.CharField(max_length=100)
+    Customer_website = models.URLField(max_length=255 , null=True , blank=True)
+
     def __str__(self):
         return self.name.name
     
