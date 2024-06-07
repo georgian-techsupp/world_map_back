@@ -36,19 +36,38 @@ def fetch_business_locations(request):
         for loc in locations
     ]
     return Response({
-        'image_url': image_url,
+        # 'image_url': image_url,
         'locations': locations_data
     })
+
+
+# class CountryViewSet(viewsets.ModelViewSet):
+#     queryset = Country.objects.all()
+#     serializer_class = CountrySerializer
+
+#     def list(self, request, *args, **kwargs):
+#         queryset = self.get_queryset()
+#         data = {country.iso_code.iso_code: country.image.url for country in queryset}
+#         return Response(data)
+
 
 
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
-
+    
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        data = {country.iso_code.iso_code: country.image.url for country in queryset}
+        data = {
+            country.iso_code.iso_code : {
+                'image_url': country.image.url,
+                'customer_website': country.Customer_website
+            }
+            for country in queryset
+        }
         return Response(data)
+
+
 
 
 @api_view(['GET'])
