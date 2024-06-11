@@ -61,13 +61,16 @@ class CountryViewSet(viewsets.ModelViewSet):
         data = {
             country.iso_code.iso_code : {
                 'image_url': country.image.url,
-                'customer_website': country.Customer_website
+                'customer_website': country.Customer_website,
+                 "costumer_fb_link" : country.costumer_fb_link,
+                 "costumer_inst_link" : country.costumer_inst_link,
+                 "costumer_x_link" : country.costumer_x_link,
+                 "costumer_linkedin_link" : country.costumer_linkedin_link,
+
             }
             for country in queryset
         }
         return Response(data)
-
-
 
 
 @api_view(['GET'])

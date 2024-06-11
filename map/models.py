@@ -18,6 +18,11 @@ class Country(models.Model):
     business_name = models.CharField(max_length=255)
     business_type = models.CharField(max_length=100)
     Customer_website = models.URLField(max_length=255 , null=True , blank=True)
+    costumer_fb_link = models.URLField(max_length=255 , null=True , blank=True)
+    costumer_inst_link = models.URLField(max_length=255 , null=True , blank=True)
+    costumer_x_link = models.URLField(max_length=255 , null=True , blank=True)
+    costumer_linkedin_link = models.URLField(max_length=255 , null=True , blank=True)
+
 
     def __str__(self):
         return self.name.name
