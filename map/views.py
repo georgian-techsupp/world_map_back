@@ -153,3 +153,8 @@ def get_google_points_for_countries(request, iso_codes):
         except Country.DoesNotExist:
             return HttpResponse(f'Country with ISO code {iso_code} does not exist at this moment', status=400)
     return redirect('/admin/map/country/')
+
+
+
+def health_check(request):
+    return HttpResponse("OK")
