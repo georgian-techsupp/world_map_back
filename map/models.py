@@ -22,6 +22,7 @@ class Country(models.Model):
     costumer_inst_link = models.URLField(max_length=255 , null=True , blank=True)
     costumer_x_link = models.URLField(max_length=255 , null=True , blank=True)
     costumer_linkedin_link = models.URLField(max_length=255 , null=True , blank=True)
+    crated = models.DateTimeField(auto_now_add=True)
 
 
     def __str__(self):
