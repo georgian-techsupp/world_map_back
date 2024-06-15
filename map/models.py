@@ -1,4 +1,6 @@
 from django.db import models
+from datetime import timedelta
+from django.utils import timezone
 
 class ISO_CODES(models.Model):
     iso_code = models.CharField(max_length=2, unique=True)  
@@ -22,7 +24,11 @@ class Country(models.Model):
     costumer_inst_link = models.URLField(max_length=255 , null=True , blank=True)
     costumer_x_link = models.URLField(max_length=255 , null=True , blank=True)
     costumer_linkedin_link = models.URLField(max_length=255 , null=True , blank=True)
-    crated = models.DateTimeField(auto_now_add=True)
+    created = models.DateTimeField(auto_now_add=True)
+    expiry_days = models.PositiveIntegerField(default=30)
+
+    def is_expired(self):
+        return timezone.now() > self.created + timedelta(minutes=self.expiry_minutes)
 
 
     def __str__(self):
