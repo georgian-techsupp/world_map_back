@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from decouple import config
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,8 +28,18 @@ SECRET_KEY = 'django-insecure-&jj-*)&-k#ikghpw=mj#xc=9t7lfdq(o3vql83loysc5auof0t
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["api.1inone.com" , "localhost" , "18.192.240.161"]
-
+ALLOWED_HOSTS = ["*"]
+CELERY_BROKER_URL = f'redis://{config("REDIS_USER")}:{config("REDIS_PASSWORD")}@{config("REDIS_PATH")}'
+CELERY_RESULT_BACKEND = f'redis://{config("REDIS_USER")}:{config("REDIS_PASSWORD")}@{config("REDIS_PATH")}'
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Tbilisi'
+CELERY_BEAT_SCHEDULE = {
+    'delete-expired-countries-every-minute': {
+        'task': 'map.tasks.delete_expired_countries',
+        'schedule': crontab(minute=0, hour='*'),
+    },
+}
 
 # Application definition
 
@@ -110,7 +121,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tbilisi'
 
 USE_I18N = True
 
@@ -141,17 +152,23 @@ DB_PASSWORD =config('DB_PASSWORD')
 DB_HOST = config('DB_HOST')
 DB_PORT = config('DB_PORT')
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': DB_NAME,
+#         'USER': DB_USER,
+#         'PASSWORD': DB_PASSWORD,
+#         'HOST': DB_HOST, 
+#         'PORT': DB_PORT,
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': DB_NAME,
-        'USER': DB_USER,
-        'PASSWORD': DB_PASSWORD,
-        'HOST': DB_HOST, 
-        'PORT': DB_PORT,
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',

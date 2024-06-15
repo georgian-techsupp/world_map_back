@@ -7,7 +7,7 @@ from django.urls import reverse
 
 
 class CountryAdmin(admin.ModelAdmin):
-    list_display = ("name","iso_code","business_name", "business_type","image_preview")
+    list_display = ("name","iso_code","business_name", "business_type", 'created','expiry_days',"image_preview")
     list_filter = ("name","iso_code","business_name", "business_type")
     search_fields = ("name__name","iso_code__iso_code","business_name", "business_type")
     actions = ['fetch_google_points']
