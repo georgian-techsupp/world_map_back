@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.utils import timezone
 
 class ISO_CODES(models.Model):
-    iso_code = models.CharField(max_length=2, unique=True)  
+    iso_code = models.CharField(max_length=5, unique=True)  
     name = models.CharField(max_length=255)
     class Meta:
         unique_together = ('iso_code', 'name')
