@@ -12,7 +12,7 @@ import json
 from decimal import Decimal, InvalidOperation
 from django.shortcuts import redirect
 from django.http import HttpResponse
-from .permissions import IsAdminUser
+from .permissions import IsAdminOrReadOnly
 
 
 @api_view(['GET'])
@@ -48,7 +48,7 @@ def fetch_business_locations(request):
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminOrReadOnly]
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

@@ -71,7 +71,7 @@ MIDDLEWARE = [
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'map.permissions.IsAdminUser',
+        'map.permissions.IsAdminOrReadOnly',
     ],
 }
 
