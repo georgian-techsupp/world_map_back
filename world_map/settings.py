@@ -68,6 +68,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'map.permissions.IsAdminUser',
+    ],
+}
+
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 

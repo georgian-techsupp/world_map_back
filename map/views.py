@@ -12,6 +12,8 @@ import json
 from decimal import Decimal, InvalidOperation
 from django.shortcuts import redirect
 from django.http import HttpResponse
+from .permissions import IsAdminUser
+
 
 @api_view(['GET'])
 def fetch_business_locations(request):
@@ -41,21 +43,13 @@ def fetch_business_locations(request):
     })
 
 
-# class CountryViewSet(viewsets.ModelViewSet):
-#     queryset = Country.objects.all()
-#     serializer_class = CountrySerializer
-
-#     def list(self, request, *args, **kwargs):
-#         queryset = self.get_queryset()
-#         data = {country.iso_code.iso_code: country.image.url for country in queryset}
-#         return Response(data)
-
 
 
 class CountryViewSet(viewsets.ModelViewSet):
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
-    
+    permission_classes = [IsAdminUser]
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         data = {
